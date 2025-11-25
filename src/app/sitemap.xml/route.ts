@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 // IMPORTANT: update this before deployment
-const BASE_URL = "https://your-domain.com";
+const BASE_URL = "https://aqua-minder.vercel.app/";
 
 export async function GET() {
   const pages = [
