@@ -42,3 +42,5 @@ next-env.d.ts
 
 /serviceAccount.json
 
+serviceAccount.json
+.env.local
