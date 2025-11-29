@@ -67,6 +67,7 @@ export default function DeviceListFirestore() {
       q,
       (snapshot: DataSnapshot) => {
         const value = snapshot.val();
+        console.debug("DeviceListFirestore: raw snapshot val:", value, "for uid", user.uid);
         if (!value) {
           setDevices([]);
           setLoading(false);
@@ -84,8 +85,27 @@ export default function DeviceListFirestore() {
         setDevices(list);
         setLoading(false);
       },
-      (err) => {
+      async (err) => {
         console.error("RTDB read error:", err);
+        // permission_denied often means DB rules prevent client read. Try server fallback.
+        if (err && err.code === "permission_denied") {
+          try {
+            const token = await auth.currentUser?.getIdToken();
+            const res = await fetch(`/api/my/devices`, {
+              headers: { Authorization: token ? `Bearer ${token}` : "" },
+            });
+            if (res.ok) {
+              const json = await res.json();
+              const list = (json.devices || []).map((d: any) => ({ deviceId: d.deviceId, ...(d || {}) }));
+              setDevices(list);
+              setLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error("Fallback /api/my/devices failed", e);
+          }
+        }
+
         setError("Failed to load devices.");
         setLoading(false);
       }
@@ -117,6 +137,11 @@ export default function DeviceListFirestore() {
     return (
       <div>
         <p>No devices found for your account yet.</p>
+        {user && (
+          <div className="mt-2 text-xs text-slate-500">
+            Debug: signed-in uid: <span className="font-mono">{user.uid}</span>
+          </div>
+        )}
         <p className="text-sm text-slate-500 mt-2">
           Register a device from the device registration page or verify a device using the default device
           id/password.

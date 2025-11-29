@@ -1,101 +1,54 @@
-// src/app/api/device/register/route.ts
 import { NextResponse } from "next/server";
-import * as admin from "firebase-admin";
-import fs from "fs";
-import path from "path";
+import { getAdmin } from "@/lib/admin";
 import bcrypt from "bcryptjs";
-
-function initAdmin() {
-  if (admin.apps.length) return admin;
-
-  const svcEnv = process.env.FIREBASE_SERVICE_ACCOUNT;
-  try {
-    if (svcEnv) {
-      const svc = JSON.parse(svcEnv);
-      admin.initializeApp({
-        credential: admin.credential.cert(svc),
-        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-      });
-      return admin;
-    }
-  } catch {}
-
-  const p = path.join(process.cwd(), "serviceAccount.json");
-  if (fs.existsSync(p)) {
-    const svc = JSON.parse(fs.readFileSync(p, "utf8"));
-    admin.initializeApp({
-      credential: admin.credential.cert(svc),
-      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-    });
-    return admin;
-  }
-
-  admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-  });
-  return admin;
-}
 
 export async function POST(req: Request) {
   try {
-    const { token, newPassword, email, phone } = await req.json();
-    if (!token || !newPassword || !email) {
-      return NextResponse.json({ error: "missing_fields" }, { status: 400 });
-    }
+    const body = await req.json();
+    const { token, newPassword, email, phone } = body;
+    if (!token || !newPassword || !email) return NextResponse.json({ error: "invalid" }, { status: 400 });
 
-    const adminApp = initAdmin();
-    const db = adminApp.database();
-
-    const claimRef = db.ref(`deviceClaims/${token}`);
-    const claimSnap = await claimRef.once("value");
-
-    if (!claimSnap.exists()) {
+    // Validate token format (alphanumeric only)
+    if (!/^[a-zA-Z0-9_-]+$/.test(token)) {
       return NextResponse.json({ error: "invalid_token" }, { status: 400 });
     }
 
-    const claim = claimSnap.val();
-    if (claim.status === "done" || claim.expiresAt < Date.now()) {
-      return NextResponse.json({ error: "expired_token" }, { status: 400 });
-    }
+    const admin = getAdmin();
+    const tokenSnap = await admin.database().ref(`deviceRegisterTokens/${token}`).get();
+    if (!tokenSnap.exists()) return NextResponse.json({ error: "invalid_token" }, { status: 400 });
 
-    const deviceId = claim.deviceId;
+    const { deviceId } = tokenSnap.val();
 
-    // Create or fetch Firebase Auth user
-    let user;
+    // create Firebase Auth user for the owner (email+password)
+    const auth = admin.auth();
+    let userRecord;
     try {
-      user = await adminApp.auth().getUserByEmail(email);
-    } catch {
-      user = await adminApp.auth().createUser({
-        email,
-        emailVerified: false,
-        phoneNumber: phone || undefined,
-      });
+      userRecord = await auth.createUser({ email, password: newPassword });
+    } catch (e: any) {
+      // If user exists, sign them in by finding user
+      if (e.code === "auth/email-already-exists") {
+        userRecord = await auth.getUserByEmail(email);
+      } else {
+        throw e;
+      }
     }
 
-    // Hash new password
-    const newHash = await bcrypt.hash(newPassword, 10);
-
-    // Update device record
-    await db.ref(`devices/${deviceId}`).update({
-      ownerUid: user.uid,
-      passwordHash: newHash,
-      recoveryEmail: email,
-      recoveryPhone: phone || null,
+    // link device with owner UID
+    await admin.database().ref(`devices/${deviceId}`).update({
+      ownerUid: userRecord.uid,
       verified: true,
-      claimedAt: Date.now(),
+      passwordHash: await bcrypt.hash(newPassword, 10),
+      userEmail: email,
+      userPhone: phone || null,
+      verifiedAt: Date.now(),
     });
 
-    // Mark claim token as used
-    await claimRef.update({
-      status: "done",
-      usedAt: Date.now(),
-      usedBy: user.uid,
-    });
+    // remove token
+    await admin.database().ref(`deviceRegisterTokens/${token}`).remove();
 
-    return NextResponse.json({ ok: true, ownerUid: user.uid });
-  } catch (err: any) {
-    console.error("REGISTER ERROR:", err);
-    return NextResponse.json({ error: String(err.message || err) }, { status: 500 });
+    return NextResponse.json({ ok: true, ownerUid: userRecord.uid });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "internal" }, { status: 500 });
   }
 }

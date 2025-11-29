@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "devices": {
+      "$deviceId": {
+        ".read": "auth != null && root.child('devices').child($deviceId).child('ownerUid').val() === auth.uid",
+        ".write": "false"
+      }
+    },
+    "commands": {
+      "$deviceId": {
+        ".read": "false",
+        ".write": "auth != null && root.child('devices').child($deviceId).child('ownerUid').val() === auth.uid"
+      }
+    }
+  }
+}

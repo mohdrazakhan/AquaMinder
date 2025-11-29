@@ -1,0 +1,11 @@
+{
+  "projects": {
+    "default": "YOUR_FIREBASE_PROJECT_ID"
+  }
+}
+
+/*
+  Rename this file to `.firebaserc` (or run `firebase use --add`) and replace
+  `YOUR_FIREBASE_PROJECT_ID` with your actual Firebase project id. Alternatively
+  run the deploy command with `--project your-project-id`.
+*/

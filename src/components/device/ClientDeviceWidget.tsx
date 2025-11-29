@@ -10,14 +10,12 @@ export default function ClientDeviceWidget({ deviceId }: { deviceId: string }) {
 
   useEffect(() => {
     if (!db) return;
-
     const statusRef = ref(db, `devices/${deviceId}/status`);
     return onValue(statusRef, (snapshot) => {
       setStatus(snapshot.val());
     });
   }, [deviceId]);
 
-  if (!status) return <p>Loading...</p>;
-
+  if (!status) return <p>Loading status...</p>;
   return <MotorCard deviceId={deviceId} status={status} />;
 }

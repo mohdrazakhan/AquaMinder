@@ -12,18 +12,27 @@ export default function MotorCard({ deviceId, status }: Props) {
   async function sendCommand(cmd: "motor_on" | "motor_off") {
     setLoading(true);
     try {
+      // get current user's ID token and include in Authorization header
+      const app = await import("@/lib/firebase").then((m) => m.getClientApp());
+      const { getAuth } = await import("firebase/auth");
+      const auth = getAuth(app);
+      const currentUser = auth.currentUser;
+      const idToken = currentUser ? await currentUser.getIdToken() : null;
+
       const res = await fetch("/api/commands", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
         body: JSON.stringify({
           devicePath: `devices/${deviceId}/commands`,
           cmd,
           payload: {},
         }),
       });
-      // optional: handle API response
+      if (!res.ok) {
+        throw new Error(`Command failed: ${res.status} ${res.statusText}`);
+      }
       const json = await res.json();
-      // console.log('command result', json);
+      // Optional: Show success feedback to user
     } catch (err) {
       console.error("sendCommand failed", err);
     } finally {

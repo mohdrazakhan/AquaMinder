@@ -66,6 +66,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, customToken, ownerUid });
   } catch (err: any) {
     console.error("/api/device/login error:", err);
-    return NextResponse.json({ error: String(err.message || err) }, { status: 500 });
+    return NextResponse.json({ error: "internal_error" }, { status: 500 });
   }
 }

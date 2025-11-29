@@ -1,11 +1,64 @@
-@keyframes float {
-	0% { transform: translateY(0px); }
-	50% { transform: translateY(-16px); }
-	100% { transform: translateY(0px); }
-}
-.animate-float {
-	animation: float 3s ease-in-out infinite;
-}
+/* src/app/styles/globals.css */
+
+/* Tailwind base / components / utilities */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom globals */
+:root {
+  --brand-blue: #0ea5e9; /* tweak as needed */
+}
+
+html, body, #__next {
+  height: 100%;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background-color: white;
+  color: #0f172a;
+}
+
+/* small helper for logo image in navbar */
+.nav-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+/* Animations for About page */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 560ms cubic-bezier(.2,.9,.2,1) both;
+}
+
+@keyframes bob {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+.float-bob {
+  animation: bob 3.8s ease-in-out infinite;
+}
+
+@keyframes wave1 {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-18px); }
+  100% { transform: translateX(0); }
+}
+@keyframes wave2 {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+.wave-1 { animation: wave1 5.8s linear infinite; }
+.wave-2 { animation: wave2 4s linear infinite; }
+
+/* small subtle card accent */
+.card-accent {
+  background: linear-gradient(90deg, rgba(14,165,233,0.04), rgba(14,165,233,0));
+}

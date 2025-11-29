@@ -1,15 +1,15 @@
-"use client";
+// src/app/dashboard/page.tsx
+import React from "react";
 import DeviceListFirestore from "@/components/DeviceListFirestore";
+import AuthGuard from "@/components/AuthGuard";
 
 export default function DashboardPage() {
   return (
-    <div className="py-12 container">
-      <h1 className="text-3xl font-extrabold">Dashboard</h1>
-      <p className="text-slate-600 mt-2">Manage your devices</p>
-
-      <div className="mt-6">
+    <AuthGuard>
+      <div className="container py-12">
+        <h1 className="text-2xl font-bold mb-6">Your Devices</h1>
         <DeviceListFirestore />
       </div>
-    </div>
+    </AuthGuard>
   );
 }
