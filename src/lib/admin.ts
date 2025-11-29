@@ -6,11 +6,22 @@ let adminApp: admin.app.App | null = null;
 function getServiceAccount(): any {
   const raw = process.env.FIREBASE_SERVICE_ACCOUNT || "";
   if (!raw) {
-    // fallback to serviceAccount.json at repo root
+    // In production we require `FIREBASE_SERVICE_ACCOUNT` env var to be set
+    // to avoid bundlers trying to include local files (and to keep secrets out of the repo).
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "service account not found; set FIREBASE_SERVICE_ACCOUNT in your environment for production"
+      );
+    }
+
+    // Development fallback: try to read local `serviceAccount.json` if present.
     try {
-      return require("../../serviceAccount.json");
+      // Use a dynamic require to avoid static bundlers resolving the path during production builds.
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const req: any = eval("require");
+      return req("../../serviceAccount.json");
     } catch (err) {
-      throw new Error("service account not found; set FIREBASE_SERVICE_ACCOUNT or add serviceAccount.json");
+      throw new Error("service account not found; set FIREBASE_SERVICE_ACCOUNT or add serviceAccount.json (dev only)");
     }
   }
 
