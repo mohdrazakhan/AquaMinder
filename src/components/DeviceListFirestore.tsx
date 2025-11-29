@@ -9,7 +9,6 @@ import {
   query,
   orderByChild,
   equalTo,
-  Database,
   DataSnapshot,
 } from "firebase/database";
 import { db, getClientApp } from "@/lib/firebase";
@@ -59,7 +58,6 @@ export default function DeviceListFirestore() {
     setError(null);
 
     // Query devices where ownerUid == current user's uid.
-    // This assumes your device records have `ownerUid: "<uid>"`.
     const devicesRef = ref(db, "devices");
     const q = query(devicesRef, orderByChild("ownerUid"), equalTo(user.uid));
 
@@ -68,35 +66,52 @@ export default function DeviceListFirestore() {
       (snapshot: DataSnapshot) => {
         const value = snapshot.val();
         console.debug("DeviceListFirestore: raw snapshot val:", value, "for uid", user.uid);
+
         if (!value) {
           setDevices([]);
           setLoading(false);
           return;
         }
-        // snapshot.val() is an object keyed by deviceId
-        const list: DeviceEntry[] = Object.keys(value).map((key) => {
-          return {
-            deviceId: key,
-            ...(value[key] || {}),
-          };
-        });
-        // optional: sort by addedAt descending if exists
+
+        const list: DeviceEntry[] = Object.keys(value).map((key) => ({
+          deviceId: key,
+          ...(value[key] || {}),
+        }));
+
         list.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
         setDevices(list);
         setLoading(false);
       },
       async (err) => {
         console.error("RTDB read error:", err);
-        // permission_denied often means DB rules prevent client read. Try server fallback.
-        if (err && err.code === "permission_denied") {
+
+        /**
+         * SAFE TYPE CHECK:
+         * `err` is unknown, so we narrow it by checking if it is an object
+         * AND has a `code` property.
+         */
+        if (
+          err &&
+          typeof err === "object" &&
+          "code" in err &&
+          (err as any).code === "permission_denied"
+        ) {
           try {
+            const app = getClientApp();
+            const auth = getAuth(app);
             const token = await auth.currentUser?.getIdToken();
+
             const res = await fetch(`/api/my/devices`, {
               headers: { Authorization: token ? `Bearer ${token}` : "" },
             });
+
             if (res.ok) {
               const json = await res.json();
-              const list = (json.devices || []).map((d: any) => ({ deviceId: d.deviceId, ...(d || {}) }));
+              const list = (json.devices || []).map((d: any) => ({
+                deviceId: d.deviceId,
+                ...(d || {}),
+              }));
+
               setDevices(list);
               setLoading(false);
               return;

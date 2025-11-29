@@ -2,18 +2,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
-  // Next's useSearchParams may be null in some contexts — guard for it.
-  const searchParams = useSearchParams();
   const router = useRouter();
 
-  // read token from query string (safe)
-  const tokenParam = searchParams ? searchParams.get("token") : null;
-
   // state
-  const [token, setToken] = useState<string | null>(tokenParam);
+  const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
@@ -21,16 +16,25 @@ export default function RegisterPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Read token from query string on the client (safe, runs only in browser)
   useEffect(() => {
-    // if no token param we should redirect user to device verify page
-    // (this page is only valid after a device verification step).
-    if (!tokenParam) {
-      // small delay so user sees route change; you can remove setTimeout
+    try {
+      const qs = typeof window !== "undefined" ? window.location.search : "";
+      const params = new URLSearchParams(qs);
+      const t = params.get("token");
+      if (!t) {
+        // No token — redirect to device verify page
+        router.replace("/device/verify");
+        return;
+      }
+      setToken(t);
+    } catch (e) {
+      // If anything goes wrong, redirect to verify (safe fallback)
       router.replace("/device/verify");
-      return;
     }
-    setToken(tokenParam);
-  }, [tokenParam, router]);
+    // We only want to run this once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -62,47 +66,50 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        // expect backend to return { error: "..." }
         setError(data?.error || "Registration failed");
         setLoading(false);
         return;
       }
 
-      // success -> show confirmation and redirect to login
       setMessage("Device registered and account created. Redirecting to login...");
       setLoading(false);
 
-      // wait a second so user can read the message, then redirect:
       setTimeout(() => {
         router.push("/login");
       }, 1000);
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(err);
       setError("Unexpected error while registering. Check the server logs.");
       setLoading(false);
     }
   }
 
+  if (token === null) {
+    // While we parse the token (very briefly) show a loader to avoid flash
+    return <div className="container mx-auto py-12">Checking registration token…</div>;
+  }
+
   return (
     <div className="container mx-auto py-12 max-w-3xl px-4">
       <h1 className="text-3xl font-extrabold mb-6">Register Device</h1>
 
-      {/* If there is no token, we redirect above. If there's a token but user landed here somehow,
-          show an info box. */}
       {!token ? (
         <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-          <p className="text-yellow-700">You must verify the device first (enter Device ID + default password) to get a temporary registration token.</p>
-          <p className="mt-2"><a className="text-blue-600 underline" href="/device/verify">Go to device verify page</a></p>
+          <p className="text-yellow-700">
+            You must verify the device first (enter Device ID + default password) to get a temporary registration token.
+          </p>
+          <p className="mt-2">
+            <a className="text-blue-600 underline" href="/device/verify">
+              Go to device verify page
+            </a>
+          </p>
         </div>
       ) : null}
 
-      {message && (
-        <div className="mb-4 p-4 rounded bg-green-50 text-green-700">{message}</div>
-      )}
+      {message && <div className="mb-4 p-4 rounded bg-green-50 text-green-700">{message}</div>}
 
-      {error && (
-        <div className="mb-4 p-4 rounded bg-red-50 text-red-700">{error}</div>
-      )}
+      {error && <div className="mb-4 p-4 rounded bg-red-50 text-red-700">{error}</div>}
 
       <form onSubmit={handleRegister} className="bg-white border rounded p-6 shadow-sm">
         <div className="mb-4">
