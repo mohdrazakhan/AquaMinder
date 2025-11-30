@@ -1,5 +1,6 @@
 // src/lib/seo.tsx
 import React from "react";
+import Head from "next/head";
 
 export default function SEO({ title, desc, image, children }: { title?: string; desc?: string; image?: string; children?: any }) {
   const site = "Aqua Minder";

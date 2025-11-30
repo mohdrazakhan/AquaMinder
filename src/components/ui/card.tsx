@@ -1,10 +1,12 @@
 // src/components/ui/Card.tsx
 import React from "react";
+import clsx from "clsx";
 
 export default function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-2xl p-6 shadow-sm ${className}`}>
+    <div className={clsx("bg-white rounded-2xl", className)}>
       {children}
     </div>
   );
 }
+// src/components/ui/Card.tsx
