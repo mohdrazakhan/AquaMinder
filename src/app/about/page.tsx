@@ -158,7 +158,7 @@ export default function AboutPage() {
               A compact team of firmware, hardware, cloud and product engineers. We partner with certified installers for deployments — and we're growing.
             </p>
 
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 justify-center items-start max-w-5xl mx-auto">
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 justify-center items-center max-w-5xl mx-auto">
 
               {/* Founder cards from TEAM */}
               {TEAM.map((p) => (
@@ -166,8 +166,8 @@ export default function AboutPage() {
               ))}
 
               {/* Hiring / Join us card */}
-              <div className="text-center flex flex-col items-center hover:scale-[1.03] transition-all bg-white rounded-lg p-6 shadow-sm">
-                <div className="w-36 h-36 rounded-full overflow-hidden shadow-md bg-slate-100 flex items-center justify-center">
+              <div className="w-56 text-center hover:scale-[1.03] transition-all">
+                <div className="mx-auto w-36 h-36 rounded-full overflow-hidden shadow-md bg-slate-100 flex items-center justify-center">
                   {/* Replace with /public/images/join-us.jpg when ready */}
                   <img src="/images/join-us.jpg" alt="" className="w-full h-full object-cover" />
                 </div>
