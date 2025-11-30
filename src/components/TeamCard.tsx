@@ -3,12 +3,18 @@
 import React from "react";
 import Image from "next/image";
 
-export default function TeamCard({ name, subtitle, role, img }: { name: string; subtitle?: string; role?: string; img?: string }) {
+export default function TeamCard({ name, subtitle, role, img, linkedin }: { name: string; subtitle?: string; role?: string; img?: string; linkedin?: string }) {
   return (
     <div className="w-56 text-center hover:scale-[1.03] transition-all">
       <div className="mx-auto w-36 h-36 rounded-full overflow-hidden shadow-md">
         {/* if using public images in /public/images */}
-        <Image src={`/images/${img}`} alt={name} width={144} height={144} className="object-cover" />
+        {linkedin ? (
+          <a href={linkedin} target="_blank" rel="noopener noreferrer" aria-label={`Open ${name} on LinkedIn`}>
+            <Image src={`/images/${img}`} alt={name} width={144} height={144} className="object-cover" />
+          </a>
+        ) : (
+          <Image src={`/images/${img}`} alt={name} width={144} height={144} className="object-cover" />
+        )}
       </div>
 
       <div className="mt-4">

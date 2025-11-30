@@ -15,8 +15,9 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 const TEAM = [
-  { name: "Mohd. Raza Khan", subtitle: "CS Engineer", role: "Founder", img: "raza.jpeg" },
-  { name: "Chandan Kumar Tiwari", subtitle: "CS Engineer", role: "Co-Founder", img: "chandan.jpeg" },
+  { name: "Mohd. Raza Khan", subtitle: "CS Engineer", role: "Founder", img: "raza.jpeg", linkedin: "https://www.linkedin.com/in/mohdrazakhan32" },
+  { name: "Chandan Kumar Tiwari", subtitle: "CS Engineer", role: "Co-Founder", img: "chandan.jpeg", linkedin: "https://www.linkedin.com/in/chandan-tiwari-462824265/" },
+  { name: "We're Hiring!", subtitle: "Join our team", role: "See open roles", img: "hiring.png", linkedin: "/careers" },
 ];
 
 export default function AboutPage() {
@@ -162,24 +163,11 @@ export default function AboutPage() {
 
               {/* Founder cards from TEAM */}
               {TEAM.map((p) => (
-                <TeamCard key={p.name} name={p.name} subtitle={p.subtitle} role={p.role} img={p.img} />
+                <TeamCard key={p.name} name={p.name} subtitle={p.subtitle} role={p.role} img={p.img} linkedin={p.linkedin} />
               ))}
 
               {/* Hiring / Join us card */}
-              <div className="w-56 text-center hover:scale-[1.03] transition-all">
-                <div className="mx-auto w-36 h-36 rounded-full overflow-hidden shadow-md bg-slate-100 flex items-center justify-center">
-                  {/* Replace with /public/images/join-us.jpg when ready */}
-                  <img src="/images/join-us.jpg" alt="" className="w-full h-full object-cover" />
-                </div>
-
-                <div className="mt-4">
-                  <div className="font-semibold text-lg">We're Hiring!</div>
-                  <div className="text-sm text-slate-500">Join our mission</div>
-                  <Link href="/careers" className="block text-xs text-sky-600 mt-2 hover:underline">
-                    View careers →
-                  </Link>
-                </div>
-              </div>
+              
             </div>
           </div>
 
