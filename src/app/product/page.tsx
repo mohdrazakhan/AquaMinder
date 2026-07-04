@@ -7,11 +7,11 @@ import { MODELS } from "@/data/models";
 export default function ProductIndexPage() {
   return (
     <>
-      <SEO title="Products — Aqua Minder" desc="Explore AquaMinder device models: Lite, Pro and Pro+." />
+      <SEO title="Products — Aqua Minder" desc="Explore Aqua Minder device models: Aqua Minder and Aqua Minder Pro." />
       <main className="py-12">
         <div className="container mx-auto px-6">
           <header className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900">AquaMinder devices</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900">Aqua Minder Devices</h1>
             <p className="mt-3 text-slate-600">
               Choose the device that fits your home or business — click Learn more for full specs and purchasing options.
             </p>

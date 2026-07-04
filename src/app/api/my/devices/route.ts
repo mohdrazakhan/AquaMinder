@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     const decoded = await admin.auth().verifyIdToken(token);
     const uid = decoded.uid;
 
-    const snap = await admin.database().ref("devices").orderByChild("ownerUid").equalTo(uid).once("value");
+    const snap = await admin.database().ref("tanks").orderByChild("ownerUid").equalTo(uid).once("value");
     if (!snap.exists()) return NextResponse.json({ devices: [] });
 
     const val = snap.val();

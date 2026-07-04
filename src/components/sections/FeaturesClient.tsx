@@ -21,7 +21,7 @@ function SvgLeakAlert() {
       <rect width="120" height="120" rx="18" fill="#f8fafc" />
       <g transform="translate(20,20)">
         <path d="M40 5c-6 8-18 18-18 30 0 12 10 22 18 28 8-6 18-16 18-28 0-12-12-22-18-30z" fill="url(#g1)"/>
-        <circle cx="36" cy="52" r="4" fill="#fff" fillOpacity="0.4"/>
+        <circle cx="36" cy="52" r="4" fill="#fff" fillOpacity="0.8"/>
       </g>
     </svg>
   );
@@ -165,10 +165,10 @@ export default function FeaturesClient() {
   return (
     <div>
       <div className="text-center max-w-2xl mx-auto">
-        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
           Smart features that actually help
         </h2>
-        <p className="mt-3 text-slate-600">
+        <p className="mt-4 text-lg text-slate-600">
           Aqua Minder combines powerful hardware with intelligent software to protect your home and save water.
         </p>
       </div>
@@ -187,15 +187,16 @@ export default function FeaturesClient() {
             <motion.div
               key={f.id}
               variants={cardVariant}
-              whileHover={{ y: -6 }}
-              className="bg-white rounded-2xl shadow-sm border p-6 md:p-8"
+              whileHover={{ y: -8, scale: 1.01 }}
+              className="group relative bg-white rounded-3xl border border-slate-200 transition-all duration-300 overflow-hidden"
             >
-              <div className={`grid grid-cols-1 md:grid-cols-12 gap-6 items-center ${isEven ? "md:flex-row-reverse" : ""}`}>
+
+              <div className={`relative z-10 p-8 md:p-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center ${isEven ? "md:flex-row-reverse" : ""}`}>
                 {/* Illustration column */}
-                <div className="md:col-span-5 flex justify-center items-center">
+                <div className={`md:col-span-5 flex justify-center items-center ${isEven ? "md:order-last" : ""}`}>
                   <motion.div
                     variants={illustrationVariant}
-                    className="w-full max-w-[300px] mx-auto md:mx-0"
+                    className="w-full max-w-[260px] md:max-w-[300px] mx-auto md:mx-0 transition-transform duration-500 group-hover:scale-105"
                   >
                     <Illustration />
                   </motion.div>
@@ -203,11 +204,15 @@ export default function FeaturesClient() {
 
                 {/* Text column */}
                 <div className="md:col-span-7">
-                  <div className="text-sky-600 text-sm font-medium mb-2">{f.subtitle}</div>
-                  <h3 className="text-2xl font-semibold text-slate-900">{f.title}</h3>
-                  <p className="mt-3 text-slate-600 leading-relaxed">{f.desc}</p>
-
-                  {/* Action buttons removed per design: no CTA buttons in feature cards */}
+                  <div className="inline-block px-3 py-1 rounded-full bg-sky-50 text-sky-600 text-xs font-bold uppercase tracking-wider mb-4 border border-sky-100">
+                    {f.subtitle}
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+                    {f.title}
+                  </h3>
+                  <p className="mt-4 text-slate-600 leading-relaxed text-lg">
+                    {f.desc}
+                  </p>
                 </div>
               </div>
             </motion.div>

@@ -1,0 +1,40 @@
+{
+  "rules": {
+    "tanks": {
+      // Relaxed rules for easier development and testing
+      ".read": true,
+      ".write": true,
+      "$deviceId": {
+        // Allow read/write to anyone (or change to auth != null if you want basic protection)
+        ".read": true,
+        ".write": true,
+        
+        // --- HARDWARE MICRO-NODES ---
+        "stream": {
+          ".read": true,
+          ".write": true
+        },
+        "online": {
+          ".read": true,
+          ".write": true
+        },
+        "status": {
+          ".read": true,
+          ".write": true
+        },
+        "last_heartbeat": {
+          ".read": true,
+          ".write": true
+        },
+        "logs": {
+          ".read": true,
+          ".write": true
+        },
+        "schedules": {
+          ".read": true,
+          ".write": true
+        }
+      }
+    }
+  }
+}

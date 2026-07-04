@@ -58,7 +58,7 @@ export default function DeviceListFirestore() {
     setError(null);
 
     // Query devices where ownerUid == current user's uid.
-    const devicesRef = ref(db, "devices");
+    const devicesRef = ref(db, "tanks");
     const q = query(devicesRef, orderByChild("ownerUid"), equalTo(user.uid));
 
     const unsubscribe = onValue(
@@ -85,40 +85,29 @@ export default function DeviceListFirestore() {
       async (err) => {
         console.error("RTDB read error:", err);
 
-        /**
-         * SAFE TYPE CHECK:
-         * `err` is unknown, so we narrow it by checking if it is an object
-         * AND has a `code` property.
-         */
-        if (
-          err &&
-          typeof err === "object" &&
-          "code" in err &&
-          (err as any).code === "permission_denied"
-        ) {
-          try {
-            const app = getClientApp();
-            const auth = getAuth(app);
-            const token = await auth.currentUser?.getIdToken();
+        // ALWAYS trigger fallback to secure /api/my/devices if client onValue fails for any permission/timeout reason
+        try {
+          const app = getClientApp();
+          const auth = getAuth(app);
+          const token = await auth.currentUser?.getIdToken();
 
-            const res = await fetch(`/api/my/devices`, {
-              headers: { Authorization: token ? `Bearer ${token}` : "" },
-            });
+          const res = await fetch(`/api/my/devices`, {
+            headers: { Authorization: token ? `Bearer ${token}` : "" },
+          });
 
-            if (res.ok) {
-              const json = await res.json();
-              const list = (json.devices || []).map((d: any) => ({
-                deviceId: d.deviceId,
-                ...(d || {}),
-              }));
+          if (res.ok) {
+            const json = await res.json();
+            const list = (json.devices || []).map((d: any) => ({
+              deviceId: d.deviceId,
+              ...(d || {}),
+            }));
 
-              setDevices(list);
-              setLoading(false);
-              return;
-            }
-          } catch (e) {
-            console.error("Fallback /api/my/devices failed", e);
+            setDevices(list);
+            setLoading(false);
+            return;
           }
+        } catch (e) {
+          console.error("Fallback /api/my/devices failed", e);
         }
 
         setError("Failed to load devices.");
@@ -150,31 +139,40 @@ export default function DeviceListFirestore() {
 
   if (!devices || devices.length === 0) {
     return (
-      <div>
-        <p>No devices found for your account yet.</p>
+      <div className="bg-slate-50 border rounded-lg p-8 text-center max-w-2xl mx-auto my-8 shadow-sm">
+        <h3 className="text-xl font-bold text-slate-800 mb-2">No devices connected yet</h3>
+        <p className="text-slate-600 mb-6">
+          Connect your smart water monitoring device to start tracking and controlling it from your portal.
+        </p>
+        <Link href="/dashboard/connect" className="px-6 py-3 bg-sky-500 text-white font-semibold rounded-md shadow hover:bg-sky-600 transition">
+          Connect your first device
+        </Link>
         {user && (
-          <div className="mt-2 text-xs text-slate-500">
+          <div className="mt-6 text-xs text-slate-400">
             Debug: signed-in uid: <span className="font-mono">{user.uid}</span>
           </div>
         )}
-        <p className="text-sm text-slate-500 mt-2">
-          Register a device from the device registration page or verify a device using the default device
-          id/password.
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {devices.map((d) => (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-slate-600">Managing {devices.length} connected device{devices.length === 1 ? "" : "s"}</p>
+        <Link href="/dashboard/connect" className="px-4 py-2 bg-sky-500 text-white font-medium rounded-md shadow-sm hover:bg-sky-600 transition">
+          Connect New Device
+        </Link>
+      </div>
+      <div className="space-y-4">
+        {devices.map((d) => (
         <div key={d.deviceId} className="rounded border p-4 flex justify-between items-center">
           <div>
             <div className="font-bold text-lg">{d.deviceId}</div>
             {d.meta?.model && <div className="text-sm text-slate-600">{d.meta.model}</div>}
             {d.addedAt && (
-              <div className="text-xs text-slate-400">
-                Added {new Date(d.addedAt).toLocaleString()}
+              <div className="text-[10px] text-slate-400 font-medium">
+                Added {new Date(d.addedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}
               </div>
             )}
           </div>
@@ -197,6 +195,7 @@ export default function DeviceListFirestore() {
           </div>
         </div>
       ))}
+      </div>
     </div>
   );
 }

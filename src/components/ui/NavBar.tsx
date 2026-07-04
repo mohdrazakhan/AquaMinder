@@ -75,14 +75,16 @@ export default function NavBar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <div className="hidden md:block text-sm text-slate-700">{user.email}</div>
-              <button onClick={handleLogout} className="px-3 py-2 border rounded-md text-sm text-slate-700 hover:bg-slate-50">Logout</button>
+              <div className="hidden lg:block text-sm text-slate-700">{user.email}</div>
+              <Link href="/dashboard/connect" className="px-3 py-2 border rounded-md text-sm text-slate-700 hover:bg-slate-50">Connect Device</Link>
               <Link href="/dashboard" className="px-4 py-2 bg-sky-500 text-white rounded-md text-sm shadow-sm hover:bg-sky-600">Dashboard</Link>
+              <button onClick={handleLogout} className="px-3 py-2 border rounded-md text-sm text-slate-700 hover:bg-slate-50">Logout</button>
             </>
           ) : (
             <>
-              <Link href="/login" className="px-4 py-2 border rounded-md text-sm text-slate-700 hover:bg-slate-50">Login</Link>
-              <Link href="/product" className="px-4 py-2 bg-sky-500 text-white rounded-md text-sm shadow-sm hover:bg-sky-600">Buy device</Link>
+              <Link href="/login" className="px-3 py-2 border rounded-md text-sm text-slate-700 hover:bg-slate-50">Login</Link>
+              <Link href="/signup" className="px-4 py-2 bg-sky-500 text-white rounded-md text-sm shadow-sm hover:bg-sky-600">Sign Up</Link>
+              <Link href="/product" className="px-3 py-2 border rounded-md text-sm text-slate-700 hover:bg-slate-50">Buy device</Link>
             </>
           )}
         </div>

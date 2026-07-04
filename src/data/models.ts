@@ -1,6 +1,6 @@
 // src/data/models.ts
 export type Model = {
-  id: "lite" | "pro" | "pro-plus";
+  id: "lite" | "pro";
   title: string;
   subtitle?: string;
   short: string;
@@ -14,11 +14,11 @@ export type Model = {
 export const MODELS: Model[] = [
   {
     id: "lite",
-    title: "AquaMinder Lite",
+    title: "Aqua Minder",
     subtitle: "Basic",
-    short: "Reliable scheduling & local alerts for small homes and flats.",
+    short: "Reliable scheduling & local alerts for homes.",
     long:
-      "AquaMinder Lite is a compact, affordable water controller for single-home setups. It provides manual controls, local scheduling, and essential notifications without cloud dependency — perfect for students, flats, and basic households.",
+      "Aqua Minder is a compact water controller for single-home setups. It provides manual controls, local scheduling, and essential notifications.",
     priceSuggested: "₹1,499",
     features: [
       "Manual Motor Control (App + Web)",
@@ -37,17 +37,17 @@ export const MODELS: Model[] = [
   },
   {
     id: "pro",
-    title: "AquaMinder Pro",
+    title: "Aqua Minder +",
     subtitle: "Recommended",
-    short: "Level sensing, auto ON/OFF and cloud history for households & PGs.",
+    short: "Advanced level sensing, Dry Run Protection, and Temperature monitoring.",
     long:
-      "AquaMinder Pro adds water-level sensing and cloud features for homes and rental properties. Use smart auto ON/OFF based on tank level, view 30-day history, and get smarter alerts to prevent dry-runs and overflow.",
+      "Aqua Minder + adds advanced sensors for your water system. It includes intelligent Dry Run Protection to save your motor, real-time tank temperature monitoring, and smart auto ON/OFF based on tank levels.",
     priceSuggested: "₹3,499",
     features: [
-      "All Lite features",
-      "Live Water Level Monitoring (Full/High/Medium/Low/Empty)",
-      "Smart Auto ON/OFF based on tank level",
-      "Smart schedule + sensor logic",
+      "All Aqua Minder features",
+      "Dry Run Protection",
+      "Water Tank Temperature Monitoring",
+      "Live Water Level Monitoring",
       "Automatic safety alerts",
     ],
     specs: [
@@ -58,29 +58,6 @@ export const MODELS: Model[] = [
       { k: "Warranty", v: "1 year" },
     ],
     gallery: ["/images/pro-1.png", "/images/pro-2.png"],
-  },
-  {
-    id: "pro-plus",
-    title: "AquaMinder Pro+",
-    subtitle: "Premium",
-    short: "Flow monitoring, dry-run protection and advanced automations for businesses.",
-    long:
-      "AquaMinder Pro+ is the advanced model with real-time flow monitoring, dry-run protection and multi-motor support for high-demand installations. Perfect for societies, hostels, and commercial setups that need insights and automation at scale.",
-    priceSuggested: "₹6,499",
-    features: [
-      "All Pro features",
-      "Water Flow Monitoring (real-time)",
-      "Dry Run Protection (auto-off on no flow)",
-      "Advanced automations and premium hardware",
-    ],
-    specs: [
-      { k: "Connectivity", v: "Wi-Fi (2.4GHz) + Ethernet (optional)" },
-      { k: "Power", v: "12-24V DC adapter / PoE optional" },
-      { k: "Sensors", v: "High-accuracy flow sensor + level sensor" },
-      { k: "Motor Support", v: "Multi-motor / three-phase support (with relay addon)" },
-      { k: "Warranty", v: "2 years (Pro+ hardware)" },
-    ],
-    gallery: ["/images/proplus-1.png", "/images/proplus-2.png"],
   },
 ];
 

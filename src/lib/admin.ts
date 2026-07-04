@@ -19,9 +19,14 @@ function getServiceAccount(): any {
       // Use a dynamic require to avoid static bundlers resolving the path during production builds.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const req: any = eval("require");
-      return req("../../serviceAccount.json");
-    } catch (err) {
-      throw new Error("service account not found; set FIREBASE_SERVICE_ACCOUNT or add serviceAccount.json (dev only)");
+      const path = req("path");
+      try {
+        return req(path.join(process.cwd(), "serviceAccount.json"));
+      } catch (e) {
+        return req("../../serviceAccount.json");
+      }
+    } catch (err: any) {
+      throw new Error(`service account not found (${err.message}); set FIREBASE_SERVICE_ACCOUNT or add serviceAccount.json (dev only)`);
     }
   }
 
