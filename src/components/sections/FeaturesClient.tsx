@@ -99,23 +99,23 @@ function SvgMulti() {
 const FEATURES = [
   {
     id: "leak",
-    title: "Instant Leak Alerts",
-    subtitle: "Real-time leak & flow detection",
-    desc: "Receive push & SMS alerts the moment abnormal flow or leaks are detected. Auto-shutdown options help prevent damage and water loss.",
+    title: "Dry Run Protection",
+    subtitle: "Protect your pump",
+    desc: "Automatically detects when your motor is running without water and instantly shuts it off, preventing motor burnout and costly repairs.",
     Illustration: SvgLeakAlert,
   },
   {
     id: "insights",
-    title: "Consumption Insights",
-    subtitle: "Daily, weekly & monthly reports",
-    desc: "Actionable consumption breakdowns with personalized tips to reduce usage. Visual charts, trends and forecast make saving water simple.",
+    title: "Live Level & Temp Monitoring",
+    subtitle: "Real-time tank sensing",
+    desc: "Monitor your exact water tank levels via precise probe sensors, alongside real-time water temperature, right from your dashboard.",
     Illustration: SvgInsights,
   },
   {
     id: "shutoff",
-    title: "Remote Shutoff",
-    subtitle: "Emergency valve control",
-    desc: "Integrates with smart valves to remotely stop water during emergencies or suspected leaks — instant response from your phone.",
+    title: "Remote Motor Control",
+    subtitle: "Control from anywhere",
+    desc: "Manually turn your single-phase AC water pump ON or OFF from anywhere in the world using the Aqua Minder mobile or web app.",
     Illustration: SvgShutoff,
   },
   {
@@ -173,33 +173,22 @@ export default function FeaturesClient() {
         </p>
       </div>
 
-      <motion.div
-        className="mt-12 grid grid-cols-1 gap-10"
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: false, amount: 0.2 }}
-        variants={containerVariant}
-      >
+      <div className="mt-12 grid grid-cols-1 gap-10">
         {FEATURES.map((f, idx) => {
           const Illustration = f.Illustration;
           const isEven = idx % 2 === 1; // alternate layout for visual variety
           return (
-            <motion.div
+            <div
               key={f.id}
-              variants={cardVariant}
-              whileHover={{ y: -8, scale: 1.01 }}
-              className="group relative bg-white rounded-3xl border border-slate-200 transition-all duration-300 overflow-hidden"
+              className="relative bg-white rounded-3xl border border-slate-200 overflow-hidden"
             >
 
               <div className={`relative z-10 p-8 md:p-10 grid grid-cols-1 md:grid-cols-12 gap-8 items-center ${isEven ? "md:flex-row-reverse" : ""}`}>
                 {/* Illustration column */}
                 <div className={`md:col-span-5 flex justify-center items-center ${isEven ? "md:order-last" : ""}`}>
-                  <motion.div
-                    variants={illustrationVariant}
-                    className="w-full max-w-[260px] md:max-w-[300px] mx-auto md:mx-0 transition-transform duration-500 group-hover:scale-105"
-                  >
+                  <div className="w-full max-w-[260px] md:max-w-[300px] mx-auto md:mx-0">
                     <Illustration />
-                  </motion.div>
+                  </div>
                 </div>
 
                 {/* Text column */}
@@ -215,10 +204,10 @@ export default function FeaturesClient() {
                   </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           );
         })}
-      </motion.div>
+      </div>
     </div>
   );
 }

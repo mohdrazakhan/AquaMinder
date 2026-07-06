@@ -31,8 +31,8 @@ export default async function DevicePage(props: any) {
           <div>
             {/* Real-time Online / Offline Status Component */}
             <DeviceHeaderStatus deviceId={deviceId} />
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              Tank Monitor <span className="text-blue-600 font-mono">#{deviceId}</span>
+            <h1 className="text-2xl font-bold text-slate-900 flex flex-wrap items-center gap-x-2 gap-y-1">
+              Tank Monitor <span className="text-blue-600 font-mono break-all">#{deviceId}</span>
             </h1>
           </div>
           <p className="text-slate-600 text-sm max-w-md md:text-right font-medium">

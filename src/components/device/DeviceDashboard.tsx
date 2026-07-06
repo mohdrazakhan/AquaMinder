@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import ClientDeviceWidget from "./ClientDeviceWidget";
+import HistoricalChart from "./HistoricalChart";
 import ScheduleCard from "./ScheduleCard";
+import RapidDropWarning from "./RapidDropWarning";
 import { ref, onValue } from "firebase/database";
 import { getClientDatabase, getClientApp } from "@/lib/firebase";
 
@@ -60,7 +62,7 @@ export default function DeviceDashboard({ deviceId }: Props) {
   return (
     <div className="space-y-8 font-sans">
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 gap-8">
+      <div className="flex border-b border-slate-200 gap-6 md:gap-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
         <button
           onClick={() => setTab("dashboard")}
           className={`font-medium text-sm pb-3 transition-colors ${
@@ -120,8 +122,13 @@ export default function DeviceDashboard({ deviceId }: Props) {
       {/* ============ DASHBOARD HUB ============ */}
       {tab === "dashboard" && (
         <div className="space-y-6">
+          <RapidDropWarning logs={allLogs} />
+
           {/* Main widget: Tank + Controls */}
           <ClientDeviceWidget deviceId={deviceId} />
+
+          {/* Historical Graph */}
+          <HistoricalChart logs={allLogs} />
 
           {/* Recent Activity (last 10 logs) */}
           <div className="bg-white border border-slate-200 rounded-xl p-6">

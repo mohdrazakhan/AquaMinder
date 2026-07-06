@@ -127,9 +127,9 @@ export default function DeviceHeaderStatus({ deviceId }: { deviceId: string }) {
   }, [deviceId]);
 
   return (
-    <div className="flex items-center gap-2 mb-1 font-sans">
-      <span className={`h-2.5 w-2.5 rounded-full ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}></span>
-      <span className={`text-xs font-semibold uppercase tracking-wider ${isOnline ? "text-emerald-700" : "text-rose-700"}`}>
+    <div className="flex flex-wrap items-center gap-2 mb-1 font-sans">
+      <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}></span>
+      <span className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider leading-tight ${isOnline ? "text-emerald-700" : "text-rose-700"}`}>
         {isOnline ? "Device Online & Connected to WiFi" : "Device Offline (Operating on Local NVS / RTC)"}
       </span>
       {lastSeen && !isOnline && (

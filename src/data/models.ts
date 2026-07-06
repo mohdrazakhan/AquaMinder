@@ -33,7 +33,7 @@ export const MODELS: Model[] = [
       { k: "Sensors", v: "Basic flow state (on/off)" },
       { k: "Warranty", v: "1 year" },
     ],
-    gallery: ["/images/lite-1.png", "/images/lite-2.png"],
+    gallery: ["/images/device.png"],
   },
   {
     id: "pro",
@@ -53,11 +53,11 @@ export const MODELS: Model[] = [
     specs: [
       { k: "Connectivity", v: "Wi-Fi (2.4GHz) + BLE" },
       { k: "Power", v: "12V DC adapter" },
-      { k: "Sensors", v: "Ultrasonic / float level sensor (included)" },
+      { k: "Sensors", v: "Stainless steel probe level sensors (included)" },
       { k: "Motor Support", v: "Single-phase AC motor (up to 1 HP)" },
       { k: "Warranty", v: "1 year" },
     ],
-    gallery: ["/images/pro-1.png", "/images/pro-2.png"],
+    gallery: ["/images/device.png"],
   },
 ];
 

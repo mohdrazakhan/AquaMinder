@@ -158,9 +158,9 @@ export default function DeviceListFirestore() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <p className="text-slate-600">Managing {devices.length} connected device{devices.length === 1 ? "" : "s"}</p>
-        <Link href="/dashboard/connect" className="px-4 py-2 bg-sky-500 text-white font-medium rounded-md shadow-sm hover:bg-sky-600 transition">
+        <Link href="/dashboard/connect" className="px-4 py-2 bg-sky-500 text-white font-medium rounded-md shadow-sm hover:bg-sky-600 transition whitespace-nowrap">
           Connect New Device
         </Link>
       </div>

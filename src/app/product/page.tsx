@@ -23,14 +23,17 @@ export default function ProductIndexPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <h2 className="text-xl font-semibold text-slate-900">{m.title}</h2>
-                    <div className="text-sm text-slate-500 mt-1">{m.subtitle}</div>
+                    <div className="text-sm font-medium text-slate-500 mt-1">{m.subtitle}</div>
+                    <div className="text-xs text-sky-600 font-semibold mt-1 uppercase tracking-wider">
+                      Model: AQM-{m.id}
+                    </div>
                   </div>
 
-                  <div className="w-28 h-28 rounded-2xl bg-slate-50 flex items-center justify-center border">
+                  <div className="w-28 h-28 shrink-0 rounded-2xl bg-slate-50/50 flex items-center justify-center border p-2 overflow-hidden">
                     <img
-                      src={m.gallery?.[0] ?? "/device-hero.png"}
+                      src={m.gallery?.[0] ?? "/images/device.png"}
                       alt={m.title}
-                      className="max-h-20 object-contain"
+                      className="w-full h-full object-contain drop-shadow-sm"
                     />
                   </div>
                 </div>
