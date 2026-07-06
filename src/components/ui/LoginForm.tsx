@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import SocialLoginButtons from "./SocialLoginButtons";
+import { getFirebaseErrorMessage } from "@/lib/firebaseErrors";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function LoginForm() {
       router.push("/dashboard");
     } catch (err: unknown) {
       console.error("Login error", err);
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(getFirebaseErrorMessage(err));
     } finally {
       setLoading(false);
     }

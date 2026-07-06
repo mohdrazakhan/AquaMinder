@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import PhoneAuthModal from "./PhoneAuthModal";
+import { getFirebaseErrorMessage } from "@/lib/firebaseErrors";
 
 export default function SocialLoginButtons() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function SocialLoginButtons() {
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Google Login Error", err);
-      setError(err.message || "Failed to log in with Google.");
+      setError(getFirebaseErrorMessage(err));
     } finally {
       setLoading(false);
     }

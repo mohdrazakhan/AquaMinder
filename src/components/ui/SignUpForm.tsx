@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import SocialLoginButtons from "./SocialLoginButtons";
+import { getFirebaseErrorMessage } from "@/lib/firebaseErrors";
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function SignUpForm() {
       router.push("/dashboard");
     } catch (err: unknown) {
       console.error("Sign up error", err);
-      setError(err instanceof Error ? err.message : "Account creation failed. Please try again.");
+      setError(getFirebaseErrorMessage(err));
     } finally {
       setLoading(false);
     }

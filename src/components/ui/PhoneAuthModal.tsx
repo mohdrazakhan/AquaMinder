@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { getFirebaseErrorMessage } from "@/lib/firebaseErrors";
 
 type Props = {
   isOpen: boolean;
@@ -120,7 +121,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: Props) {
       setStep("OTP");
     } catch (err: any) {
       console.error("SMS Error", err);
-      setError(err.message || "Failed to send SMS. Ensure phone format is correct.");
+      setError(getFirebaseErrorMessage(err));
       
       // Reset recaptcha on error so they can try again
       if ((window as any).recaptchaVerifier) {
@@ -146,7 +147,7 @@ export default function PhoneAuthModal({ isOpen, onClose }: Props) {
       router.push("/dashboard");
     } catch (err: any) {
       console.error("OTP Error", err);
-      setError(err.message || "Invalid OTP code. Please try again.");
+      setError(getFirebaseErrorMessage(err));
     } finally {
       setLoading(false);
     }
