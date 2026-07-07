@@ -10,8 +10,12 @@ export async function GET(req: Request) {
     const admin = getAdmin();
     const decoded = await admin.auth().verifyIdToken(token);
     const uid = decoded.uid;
+    const email = decoded.email;
 
-    const snap = await admin.database().ref("tanks").orderByChild("ownerUid").equalTo(uid).once("value");
+    const isAdmin = email === "aquamindr@gmail.com";
+    const snap = isAdmin 
+      ? await admin.database().ref("tanks").once("value")
+      : await admin.database().ref("tanks").orderByChild("ownerUid").equalTo(uid).once("value");
     if (!snap.exists()) return NextResponse.json({ devices: [] });
 
     const val = snap.val();

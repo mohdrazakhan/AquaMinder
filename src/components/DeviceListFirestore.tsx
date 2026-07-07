@@ -57,9 +57,12 @@ export default function DeviceListFirestore() {
     setLoading(true);
     setError(null);
 
-    // Query devices where ownerUid == current user's uid.
+    // Query devices where ownerUid == current user's uid, or all devices if admin.
     const devicesRef = ref(db, "tanks");
-    const q = query(devicesRef, orderByChild("ownerUid"), equalTo(user.uid));
+    const isAdmin = user.email === "aquamindr@gmail.com";
+    const q = isAdmin
+      ? query(devicesRef)
+      : query(devicesRef, orderByChild("ownerUid"), equalTo(user.uid));
 
     const unsubscribe = onValue(
       q,
