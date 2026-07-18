@@ -60,36 +60,38 @@ export default function DeviceDashboard({ deviceId }: Props) {
   const recentLogs = allLogs.slice(0, 10);
 
   return (
-    <div className="space-y-8 font-sans">
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 gap-6 md:gap-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
+    <div className="space-y-6 sm:space-y-8 font-sans">
+      {/* Navigation Tabs - Mobile optimized */}
+      <div className="flex border-b border-slate-200 gap-2 sm:gap-6 md:gap-8 overflow-x-auto overflow-y-hidden scrollbar-hide -mx-4 sm:mx-0 px-4 sm:px-0">
         <button
           onClick={() => setTab("dashboard")}
-          className={`font-medium text-sm pb-3 transition-colors ${
+          className={`font-medium text-xs sm:text-sm pb-3 px-1 transition-colors flex-shrink-0 ${
             tab === "dashboard"
-              ? "border-b-2 border-blue-600 text-blue-600 font-semibold"
+              ? "border-b-2 border-sky-600 text-sky-600 font-semibold"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          Dashboard Hub
+          <span className="hidden sm:inline">Dashboard Hub</span>
+          <span className="sm:hidden">Dashboard</span>
         </button>
 
         <button
           onClick={() => setTab("manual")}
-          className={`font-medium text-sm pb-3 transition-colors ${
+          className={`font-medium text-xs sm:text-sm pb-3 px-1 transition-colors flex-shrink-0 ${
             tab === "manual"
-              ? "border-b-2 border-blue-600 text-blue-600 font-semibold"
+              ? "border-b-2 border-sky-600 text-sky-600 font-semibold"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          Manual Override
+          <span className="hidden sm:inline">Manual Override</span>
+          <span className="sm:hidden">Override</span>
         </button>
 
         <button
           onClick={() => setTab("schedule")}
-          className={`font-medium text-sm pb-3 transition-colors ${
+          className={`font-medium text-xs sm:text-sm pb-3 px-1 transition-colors flex-shrink-0 ${
             tab === "schedule"
-              ? "border-b-2 border-blue-600 text-blue-600 font-semibold"
+              ? "border-b-2 border-sky-600 text-sky-600 font-semibold"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
@@ -98,18 +100,19 @@ export default function DeviceDashboard({ deviceId }: Props) {
 
         <button
           onClick={() => setTab("logs")}
-          className={`font-medium text-sm pb-3 transition-colors ${
+          className={`font-medium text-xs sm:text-sm pb-3 px-1 transition-colors flex-shrink-0 ${
             tab === "logs"
-              ? "border-b-2 border-blue-600 text-blue-600 font-semibold"
+              ? "border-b-2 border-sky-600 text-sky-600 font-semibold"
               : "text-slate-600 hover:text-slate-900"
           }`}
         >
-          Terminal Logs
+          <span className="hidden sm:inline">Terminal Logs</span>
+          <span className="sm:hidden">Logs</span>
         </button>
 
         <button
           onClick={() => setTab("settings")}
-          className={`font-medium text-sm pb-3 transition-colors ${
+          className={`font-medium text-xs sm:text-sm pb-3 px-1 transition-colors flex-shrink-0 ${
             tab === "settings"
               ? "border-b-2 border-red-600 text-red-600 font-semibold"
               : "text-slate-600 hover:text-red-600"
@@ -121,7 +124,7 @@ export default function DeviceDashboard({ deviceId }: Props) {
 
       {/* ============ DASHBOARD HUB ============ */}
       {tab === "dashboard" && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <RapidDropWarning logs={allLogs} />
 
           {/* Main widget: Tank + Controls */}
@@ -130,26 +133,26 @@ export default function DeviceDashboard({ deviceId }: Props) {
           {/* Historical Graph */}
           <HistoricalChart logs={allLogs} />
 
-          {/* Recent Activity (last 10 logs) */}
-          <div className="bg-white border border-slate-200 rounded-xl p-6">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Recent Activity</h3>
+          {/* Recent Activity (last 10 logs) - Mobile optimized */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
+            <div className="flex items-start sm:items-center justify-between border-b border-slate-200 pb-3 mb-4 gap-2 flex-wrap sm:flex-nowrap">
+              <div className="flex-1">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900">Recent Activity</h3>
                 <p className="text-xs text-slate-500 mt-0.5">Last 10 events</p>
               </div>
               <button
                 onClick={() => setTab("logs")}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                className="text-xs font-semibold text-sky-600 hover:text-sky-700 transition-colors whitespace-nowrap px-2 py-1 rounded hover:bg-sky-50"
               >
-                View all logs →
+                View all →
               </button>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 max-h-[300px] sm:max-h-none overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
               {recentLogs.map((l, idx) => (
-                <div key={l.id || idx} className="py-2.5 border-b border-slate-100 last:border-none flex items-start justify-between gap-4">
+                <div key={l.id || idx} className="py-2.5 border-b border-slate-100 last:border-none flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-800 break-words">
+                    <div className="text-xs sm:text-sm font-medium text-slate-800 break-words">
                       {l.event || JSON.stringify(l)}
                     </div>
                     <span className="text-xs text-slate-400 font-medium">
@@ -162,8 +165,8 @@ export default function DeviceDashboard({ deviceId }: Props) {
                 </div>
               ))}
               {!recentLogs.length && (
-                <div className="py-12 text-center text-slate-500 font-medium border border-dashed border-slate-200 rounded-xl">
-                  No recent activity recorded.
+                <div className="py-8 text-center text-slate-500 font-medium border border-dashed border-slate-200 rounded-xl">
+                  No recent activity
                 </div>
               )}
             </div>
@@ -173,24 +176,24 @@ export default function DeviceDashboard({ deviceId }: Props) {
 
       {/* ============ MANUAL OVERRIDE ============ */}
       {tab === "manual" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           <ClientDeviceWidget deviceId={deviceId} />
-          <div className="bg-white border border-slate-200 rounded-xl p-6 h-fit">
-            <h3 className="text-lg font-bold text-slate-900 mb-3">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 lg:h-fit">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-3">
               Manual Override Engine
             </h3>
-            <p className="text-slate-600 text-sm leading-relaxed mb-6">
-              Instant hardware control commands are pushed directly to the high-speed Firebase Realtime Database command queue. Your AquaMinder hardware subscribes to this queue with sub-second latency to actuate the motor pump relay immediately.
+            <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
+              Instant hardware control commands are pushed directly to Firebase Realtime Database. Your AquaMinder hardware subscribes with sub-second latency.
             </p>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2">
-              <div className="font-bold text-slate-700 uppercase tracking-wider mb-1">Queue Status</div>
-              <div className="flex justify-between items-center">
-                <span>Relay Protocol</span>
-                <span className="font-mono text-blue-600 font-bold">GPIO Active High</span>
+            <div className="p-4 bg-slate-50 rounded-lg sm:rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2">
+              <div className="font-bold text-slate-700 uppercase tracking-wider text-[10px] sm:text-xs mb-2">Queue Status</div>
+              <div className="flex justify-between items-center py-1.5">
+                <span>Relay</span>
+                <span className="font-mono text-blue-600 font-bold text-xs">GPIO Active</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span>Network Protocol</span>
-                <span className="font-mono text-emerald-600 font-bold">Secure WSS</span>
+              <div className="flex justify-between items-center py-1.5">
+                <span>Network</span>
+                <span className="font-mono text-emerald-600 font-bold text-xs">Secure WSS</span>
               </div>
             </div>
           </div>
@@ -199,29 +202,29 @@ export default function DeviceDashboard({ deviceId }: Props) {
 
       {/* ============ SCHEDULES ============ */}
       {tab === "schedule" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="w-full">
           <ScheduleCard deviceId={deviceId} />
         </div>
       )}
 
       {/* ============ TERMINAL LOGS (ALL LOGS) ============ */}
       {tab === "logs" && (
-        <div className="bg-white border border-slate-200 rounded-xl p-6">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-            <div>
-              <h3 className="text-base font-bold text-slate-900">Terminal Logs</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Complete system event history from Firebase</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
+          <div className="flex items-start sm:items-center justify-between border-b border-slate-200 pb-3 mb-4 gap-2 flex-wrap sm:flex-nowrap">
+            <div className="flex-1">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">Terminal Logs</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Complete system event history</p>
             </div>
-            <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
-              {allLogs.length} Total Events
+            <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 flex-shrink-0">
+              {allLogs.length} Events
             </span>
           </div>
 
-          <div className="overflow-y-auto max-h-[70vh] pr-2 space-y-0.5 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+          <div className="overflow-y-auto max-h-[60vh] sm:max-h-[70vh] pr-2 space-y-0.5 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
             {allLogs.map((l, idx) => (
-              <div key={l.id || idx} className="py-3 border-b border-slate-100 last:border-none flex items-start justify-between gap-4">
+              <div key={l.id || idx} className="py-2.5 sm:py-3 border-b border-slate-100 last:border-none flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-slate-800 tracking-wide break-words">
+                  <div className="text-xs sm:text-sm font-medium text-slate-800 tracking-wide break-words">
                     {l.event || JSON.stringify(l)}
                   </div>
                   <span className="text-xs text-slate-400 font-medium">
@@ -229,13 +232,13 @@ export default function DeviceDashboard({ deviceId }: Props) {
                   </span>
                 </div>
                 <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-mono text-[10px] flex-shrink-0">
-                  EVENT #{allLogs.length - idx}
+                  #{allLogs.length - idx}
                 </span>
               </div>
             ))}
             {!allLogs.length && (
-              <div className="py-16 text-center text-slate-500 font-medium border border-dashed border-slate-200 rounded-xl">
-                No logs recorded in the telemetry queue.
+              <div className="py-12 sm:py-16 text-center text-slate-500 font-medium border border-dashed border-slate-200 rounded-xl">
+                No logs recorded
               </div>
             )}
           </div>
@@ -244,25 +247,25 @@ export default function DeviceDashboard({ deviceId }: Props) {
 
       {/* ============ SETTINGS ============ */}
       {tab === "settings" && (
-        <div className="bg-white border border-slate-200 rounded-xl p-6 h-fit">
-          <h3 className="text-lg font-bold text-slate-900 mb-3">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2">
             Device Settings
           </h3>
-          <p className="text-slate-600 text-sm leading-relaxed mb-6">
-            Manage your device pairing and ownership settings.
+          <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6">
+            Manage your device pairing and ownership.
           </p>
 
-          <div className="p-5 border border-red-200 bg-red-50 rounded-xl flex flex-col items-start gap-4">
+          <div className="p-4 sm:p-5 border border-red-200 bg-red-50 rounded-xl sm:rounded-2xl flex flex-col items-start gap-4">
             <div>
-              <h4 className="font-bold text-red-700">Unpair / Factory Reset</h4>
-              <p className="text-red-600/80 text-sm mt-1">
+              <h4 className="font-bold text-red-700 text-sm sm:text-base">Unpair / Factory Reset</h4>
+              <p className="text-red-600/80 text-xs sm:text-sm mt-1 leading-relaxed">
                 Removing this device will unpair it from your account and set it as an orphan device. Anyone with the device ID will be able to claim it.
               </p>
             </div>
             
             <button
               onClick={async () => {
-                if (!confirm("Are you sure you want to remove this device? This will unpair it from your account.")) return;
+                if (!confirm("Are you sure you want to remove this device?")) return;
                 
                 try {
                   const { getAuth } = await import("firebase/auth");
@@ -281,7 +284,7 @@ export default function DeviceDashboard({ deviceId }: Props) {
                   });
                   
                   if (res.ok) {
-                    alert("Device removed successfully. It is now an orphan device ready for claiming.");
+                    alert("Device removed successfully.");
                     window.location.href = "/dashboard";
                   } else {
                     const data = await res.json();
@@ -291,7 +294,7 @@ export default function DeviceDashboard({ deviceId }: Props) {
                   alert(e.message || "An error occurred.");
                 }
               }}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg text-sm transition-colors"
+              className="px-4 py-2.5 sm:py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg text-sm transition-colors self-start"
             >
               Remove Device
             </button>
