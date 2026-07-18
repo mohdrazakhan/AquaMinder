@@ -18,13 +18,31 @@ export function getClientApp() {
     // never initialize client SDK on server
     throw new Error("getClientApp() must be called from client-side code.");
   }
-  const app = !getApps().length ? initializeApp(clientConfig) : getApp();
-  return app;
+  
+  // Check if Firebase config is complete
+  if (!clientConfig.projectId || !clientConfig.apiKey) {
+    console.warn("Firebase config is incomplete. Running in preview mode.");
+    return null;
+  }
+  
+  try {
+    const app = !getApps().length ? initializeApp(clientConfig) : getApp();
+    return app;
+  } catch (error) {
+    console.warn("Firebase initialization failed:", error);
+    return null;
+  }
 }
 
 export function getClientDatabase() {
   const app = getClientApp();
-  return getDatabase(app);
+  if (!app) return null;
+  try {
+    return getDatabase(app);
+  } catch (error) {
+    console.warn("Firebase database initialization failed:", error);
+    return null;
+  }
 }
 
 // convenience default export: db only when running in browser
