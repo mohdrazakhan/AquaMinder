@@ -2,6 +2,7 @@
 import React from "react";
 import DeviceDashboard from "@/components/device/DeviceDashboard";
 import DeviceHeaderStatus from "@/components/device/DeviceHeaderStatus";
+import AuthGuard from "@/components/AuthGuard";
 
 export default async function DevicePage(props: any) {
   // Access params safely
@@ -24,26 +25,29 @@ export default async function DevicePage(props: any) {
   }
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 pb-20 font-sans">
-      {/* Clean Flat Website Header (No shadows, no bright gradients) */}
-      <header className="border-b border-slate-200 bg-white sticky top-0 z-40 px-6 py-4">
-        <div className="container mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
+    <AuthGuard>
+      <div className="min-h-screen bg-white text-slate-800 pb-20 font-sans">
+        {/* Device Status Bar */}
+        <div className="border-b border-slate-100 bg-slate-50/50 px-4 md:px-6 py-1">
+          <div className="container mx-auto">
             {/* Real-time Online / Offline Status Component */}
             <DeviceHeaderStatus deviceId={deviceId} />
-            <h1 className="text-2xl font-bold text-slate-900 flex flex-wrap items-center gap-x-2 gap-y-1">
-              Tank Monitor <span className="text-blue-600 font-mono break-all">#{deviceId}</span>
-            </h1>
+            
+            <div className="hidden md:flex md:items-center md:justify-between gap-4 mt-2">
+              <h1 className="text-2xl font-bold text-slate-900 flex flex-wrap items-center gap-x-2 gap-y-1">
+                Tank Monitor <span className="text-blue-600 font-mono break-all">#{deviceId}</span>
+              </h1>
+              <p className="text-slate-600 text-sm max-w-md text-right font-medium">
+                Manage pump relay states, toggle night mode, and inspect real-time flow telemetry directly from your dashboard.
+              </p>
+            </div>
           </div>
-          <p className="text-slate-600 text-sm max-w-md md:text-right font-medium">
-            Manage pump relay states, toggle night mode, and inspect real-time flow telemetry directly from your dashboard.
-          </p>
         </div>
-      </header>
 
-      <main className="container mx-auto px-6 py-8">
-        <DeviceDashboard deviceId={deviceId} />
-      </main>
-    </div>
+        <main className="container mx-auto px-4 md:px-6 pt-1 pb-8">
+          <DeviceDashboard deviceId={deviceId} />
+        </main>
+      </div>
+    </AuthGuard>
   );
 }

@@ -35,8 +35,9 @@ export async function POST(req: Request) {
 
     const data = snap.val();
 
-    // Verify ownership
-    if (data.ownerUid !== decodedToken.uid) {
+    // Verify ownership or superadmin
+    const isSuperAdmin = (decodedToken.email || "") === "aquamindr@gmail.com";
+    if (data.ownerUid !== decodedToken.uid && !isSuperAdmin) {
       return NextResponse.json({
         error: "unauthorized",
         message: "You do not have permission to remove this device.",

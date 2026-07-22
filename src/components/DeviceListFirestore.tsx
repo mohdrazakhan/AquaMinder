@@ -82,6 +82,15 @@ export default function DeviceListFirestore() {
         }));
 
         list.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+        
+        // Auto-redirect to the first device immediately!
+        if (list.length > 0) {
+          const { useRouter } = require("next/navigation");
+          // Use window.location to ensure a hard redirect if needed, or just router.replace
+          window.location.href = `/dashboard/device/${list[0].deviceId}`;
+          return;
+        }
+
         setDevices(list);
         setLoading(false);
       },
@@ -104,6 +113,11 @@ export default function DeviceListFirestore() {
               deviceId: d.deviceId,
               ...(d || {}),
             }));
+
+            if (list.length > 0) {
+              window.location.href = `/dashboard/device/${list[0].deviceId}`;
+              return;
+            }
 
             setDevices(list);
             setLoading(false);

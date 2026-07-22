@@ -11,6 +11,7 @@ type ScheduleItem = {
   minute: number;
   duration: number;
   active: boolean;
+  createdAt?: string;
   exists?: boolean;
 };
 
@@ -34,21 +35,32 @@ export default function ScheduleCard({ deviceId }: { deviceId: string }) {
         const val = snap.val() || {};
         const items: ScheduleItem[] = [];
 
-        // Dynamically parse all schedule keys from Firebase without any limit!
         Object.entries(val).forEach(([key, schedData]: [string, any]) => {
           if (schedData && schedData.exists !== false) {
+            let createdDateStr = "Everyday";
+            if (schedData.createdAt) {
+              const dateObj = new Date(Number(schedData.createdAt));
+              if (!isNaN(dateObj.getTime())) {
+                createdDateStr = dateObj.toLocaleDateString("en-IN", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric"
+                });
+              }
+            }
             items.push({
               key,
               hour: schedData.hour !== undefined ? Number(schedData.hour) : 6,
               minute: schedData.minute !== undefined ? Number(schedData.minute) : 30,
               duration: schedData.duration !== undefined ? Number(schedData.duration) : 15,
               active: schedData.active === true,
+              createdAt: createdDateStr,
               exists: schedData.exists !== false,
             });
           }
         });
 
-        // Sort schedules chronologically by hour and minute for elegant display
+        // Sort schedules chronologically by hour and minute
         items.sort((a, b) => {
           if (a.hour !== b.hour) return a.hour - b.hour;
           return a.minute - b.minute;
@@ -65,7 +77,7 @@ export default function ScheduleCard({ deviceId }: { deviceId: string }) {
     };
   }, [deviceId]);
 
-  // Send update to API route which updates Firebase RTDB directly
+  // Send update to API route
   async function updateScheduleData(schedKey: string, data: any) {
     setLoading(true);
     try {
@@ -106,7 +118,7 @@ export default function ScheduleCard({ deviceId }: { deviceId: string }) {
     updateScheduleData(sched.key, null);
   }
 
-  // Submit Add Schedule Form (Supports unlimited schedules)
+  // Submit Add Schedule Form
   function handleAddSubmit(e: React.FormEvent) {
     e.preventDefault();
     let h = parseInt(formHour, 10);
@@ -116,7 +128,6 @@ export default function ScheduleCard({ deviceId }: { deviceId: string }) {
     if (formPeriod === "PM" && h < 12) h += 12;
     if (formPeriod === "AM" && h === 12) h = 0;
 
-    // Determine key: find the first available slot from sched1 to sched20 matching the physical device NVS array
     let nextKey = "sched1";
     for (let i = 1; i <= 20; i++) {
       const candidateKey = `sched${i}`;
@@ -131,7 +142,8 @@ export default function ScheduleCard({ deviceId }: { deviceId: string }) {
       minute: m,
       duration: d,
       active: true,
-      exists: true
+      exists: true,
+      createdAt: Date.now(),
     });
 
     setShowAddModal(false);
@@ -147,68 +159,71 @@ export default function ScheduleCard({ deviceId }: { deviceId: string }) {
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-6 w-full font-sans">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
+    <div className="bg-white rounded-xl w-full font-sans">
+      {/* Top Header Row */}
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
         <div>
-          <span className="text-xs font-semibold tracking-wider text-slate-500 uppercase block mb-1">AUTOMATION ENGINE</span>
-          <h3 className="text-lg font-bold text-slate-900">
-            Smart Schedules
+          <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase block mb-0.5">Automated Timing</span>
+          <h3 className="text-base font-extrabold text-slate-900">
+            Active Schedules
           </h3>
         </div>
         <button 
           onClick={() => setShowAddModal(true)}
           disabled={loading}
-          className="px-3.5 py-2 rounded-lg font-medium text-xs bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+          className="px-4 py-2 rounded-lg font-bold text-xs bg-sky-500 hover:bg-sky-600 text-white shadow-sm transition-colors flex items-center gap-1.5"
         >
-          Add Schedule
+          <span>+</span> Create Schedule
         </button>
       </div>
 
-      {/* Add Schedule Modal / Inline Form */}
+      {/* Add Schedule Form */}
       {showAddModal && (
-        <form onSubmit={handleAddSubmit} className="mb-6 p-5 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
+        <form onSubmit={handleAddSubmit} className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-4 animate-in fade-in duration-150">
           <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-            <h4 className="text-sm font-bold text-slate-900">Configure New Schedule</h4>
+            <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <span>⏰</span> New Schedule Config
+            </h4>
             <button 
               type="button" 
               onClick={() => setShowAddModal(false)}
-              className="text-xs text-slate-400 hover:text-slate-600 font-bold"
+              className="text-xs text-slate-400 hover:text-slate-600 font-bold px-2 py-1 rounded hover:bg-slate-200/50"
             >
               ✕ Cancel
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Hour (1-12)</label>
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">Hour (1-12)</label>
               <input 
                 type="number" 
                 min="1" 
                 max="12" 
                 value={formHour} 
                 onChange={(e) => setFormHour(e.target.value)}
-                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-800 text-center focus:outline-none focus:border-sky-500"
                 required 
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Minute (0-59)</label>
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">Minute (0-59)</label>
               <input 
                 type="number" 
                 min="0" 
                 max="59" 
                 value={formMinute} 
                 onChange={(e) => setFormMinute(e.target.value)}
-                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-800 text-center focus:outline-none focus:border-sky-500"
                 required 
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">AM / PM</label>
+              <label className="block text-[11px] font-bold text-slate-600 mb-1">AM / PM</label>
               <select 
                 value={formPeriod} 
                 onChange={(e) => setFormPeriod(e.target.value)}
-                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+                className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:outline-none focus:border-sky-500"
               >
                 <option value="AM">AM</option>
                 <option value="PM">PM</option>
@@ -217,22 +232,38 @@ export default function ScheduleCard({ deviceId }: { deviceId: string }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Duration (Minutes)</label>
+            <label className="block text-[11px] font-bold text-slate-600 mb-1">Duration (Minutes)</label>
+            <div className="flex gap-1.5 mb-2">
+              {["5", "10", "15", "30", "45", "60"].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setFormDuration(preset)}
+                  className={`flex-1 py-1 text-xs font-bold rounded border transition-colors ${
+                    formDuration === preset
+                      ? "bg-sky-500 text-white border-sky-500"
+                      : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {preset}m
+                </button>
+              ))}
+            </div>
             <input 
               type="number" 
               min="1" 
               max="360" 
               value={formDuration} 
               onChange={(e) => setFormDuration(e.target.value)}
-              className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-800 focus:outline-none focus:border-blue-500"
+              className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:outline-none focus:border-sky-500"
               required 
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
             <button 
               type="submit"
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs rounded-lg transition-colors"
+              className="px-5 py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs rounded-lg shadow-sm transition-colors"
             >
               Save Schedule
             </button>
@@ -240,82 +271,88 @@ export default function ScheduleCard({ deviceId }: { deviceId: string }) {
         </form>
       )}
 
-      {/* Schedules List */}
-      <div className="space-y-3 mb-6">
-        {schedules.map((sched) => (
-          <div 
-            key={sched.key} 
-            className={`p-4 rounded-xl border transition-all duration-300 flex items-center justify-between ${
-              sched.active 
-                ? "bg-slate-50 border-slate-200" 
-                : "bg-slate-50/50 border-slate-100 opacity-60"
-            }`}
-          >
-            <div className="space-y-1">
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-slate-900 tracking-tight">
-                  {formatTime(sched.hour, sched.minute)}
-                </span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                  {sched.duration} mins
-                </span>
+      {/* Schedules List (Sleek Card Rows) */}
+      {schedules.length > 0 ? (
+        <div className="space-y-3 mb-6">
+          {schedules.map((sched) => (
+            <div
+              key={sched.key}
+              className={`bg-white border rounded-2xl p-4 shadow-sm transition-all duration-200 flex items-center justify-between gap-3 ${
+                sched.active
+                  ? "border-slate-200 hover:border-sky-300 hover:shadow-md"
+                  : "border-slate-200/60 bg-slate-50/50 opacity-70"
+              }`}
+            >
+              {/* Left Info Column */}
+              <div className="flex flex-col gap-1.5 min-w-0">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <span className="text-xl font-extrabold text-slate-900 tracking-tight">
+                    {formatTime(sched.hour, sched.minute)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200/80 whitespace-nowrap">
+                    ⏱ {sched.duration} mins
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                  <span className="inline-flex items-center gap-1 bg-slate-100 px-2.5 py-0.5 rounded-md text-[11px] font-semibold text-slate-600">
+                    📅 {sched.createdAt || "Everyday"}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-mono uppercase">
+                    • {sched.key}
+                  </span>
+                </div>
               </div>
-              <p className="text-xs font-medium text-slate-600">
-                Everyday • {sched.key.toUpperCase()}
-              </p>
+
+              {/* Right Controls Column */}
+              <div className="flex items-center gap-3 flex-shrink-0">
+                {/* Active Status & Switch */}
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold hidden sm:inline ${sched.active ? "text-emerald-600" : "text-slate-400"}`}>
+                    {sched.active ? "Active" : "Paused"}
+                  </span>
+                  <button
+                    onClick={() => handleToggle(sched)}
+                    disabled={loading}
+                    title={sched.active ? "Disable Schedule" : "Enable Schedule"}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                      sched.active ? "bg-emerald-500" : "bg-slate-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 shadow-md ${
+                        sched.active ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => handleDelete(sched)}
+                  disabled={loading}
+                  title="Delete Schedule"
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all text-sm font-bold"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
-
-            <div className="flex items-center gap-4">
-              {/* Delete Schedule Button */}
-              <button
-                onClick={() => handleDelete(sched)}
-                disabled={loading}
-                title="Delete Schedule"
-                className="text-slate-400 hover:text-rose-600 p-1 rounded transition-colors text-sm font-bold"
-              >
-                ✕
-              </button>
-
-              {/* Clean Flat Toggle Switch */}
-              <button
-                onClick={() => handleToggle(sched)}
-                disabled={loading}
-                title={sched.active ? "Disable Schedule" : "Enable Schedule"}
-                className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 focus:outline-none ${
-                  sched.active ? "bg-blue-600" : "bg-slate-200"
-                }`}
-              >
-                <div
-                  className={`w-4 h-4 rounded-full bg-white shadow transform transition-transform duration-300 ${
-                    sched.active ? "translate-x-6" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-        ))}
-
-        {schedules.length === 0 && !showAddModal && (
-          <div className="py-12 text-center text-slate-400 text-sm font-medium border border-dashed border-slate-200 rounded-xl">
-            No active schedules configured. Click "Add Schedule" above to set up automated cycles.
-          </div>
-        )}
-      </div>
-
-      <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
-          <span>💾</span> NVS Offline Persistence Protocol
+          ))}
         </div>
-        <p className="text-xs text-slate-600 leading-relaxed font-medium">
-          When you add, delete, or modify a schedule on this dashboard, the parameters are pushed instantly to Firebase. Your AquaMinder hardware immediately downloads the updated schedule and commits it to local NVS (Non-Volatile Storage) Preferences.
-        </p>
-        <p className="text-xs text-slate-600 leading-relaxed font-medium">
-          If your AquaMinder device loses Wi-Fi connection or goes offline, it seamlessly relies on its built-in hardware RTC (Real Time Clock) and local NVS memory to execute your automated motor intake cycles exactly on time!
-        </p>
-      </div>
+      ) : (
+        !showAddModal && (
+          <div className="py-10 text-center text-slate-400 text-sm font-medium border border-dashed border-slate-200 rounded-xl mb-4 bg-slate-50/50">
+            No active schedules configured. Click "+ Create Schedule" above to set up automated cycles.
+          </div>
+        )
+      )}
 
-      <div className="mt-4 text-right text-xs font-mono text-slate-400">
-        TARGET: tanks/{deviceId}/schedules
+      {/* Short & Clean Offline Note Banner */}
+      <div className="p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-start gap-2.5 text-xs text-emerald-800 font-medium">
+        <span className="text-base flex-shrink-0">📶</span>
+        <div>
+          <strong className="font-bold">Offline Operation Supported:</strong> Schedules work offline as well — even if your AquaMinder device is not connected to Wi-Fi, it will execute your automated cycles on time using local hardware RTC & memory.
+        </div>
       </div>
     </div>
   );

@@ -28,8 +28,17 @@ export default function ClientDeviceWidget({ deviceId }: { deviceId: string }) {
             if (unsubDb) unsubDb();
             
             unsubDb = onValue(statusRef, (snapshot) => {
-              setStatus(snapshot.val());
+              const val = snapshot.val();
+              console.log("ClientDeviceWidget: fetched status:", val);
+              
+              // If val is null, it means the database node doesn't exist or is empty
+              if (val === null) {
+                 setStatus({ _empty: true }); // Fallback to show empty state instead of infinite loading
+              } else {
+                 setStatus(val);
+              }
             }, (error) => {
+              console.error("ClientDeviceWidget: permission or read error:", error);
               // Gracefully handle permission denied without triggering Next.js error overlay
               setStatus({ _error: true, message: error.message });
             });

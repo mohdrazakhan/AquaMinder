@@ -2,14 +2,41 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { ref, onValue } from "firebase/database";
 import { getClientDatabase } from "@/lib/firebase";
 
 export default function DeviceHeaderStatus({ deviceId }: { deviceId: string }) {
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState<boolean | null>(null); // null = loading, true/false = known
   const [lastSeen, setLastSeen] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  async function handleLogout() {
+    try {
+      const app = await import("@/lib/firebase").then((m) => m.getClientApp());
+      const { getAuth, signOut } = await import("firebase/auth");
+      const auth = getAuth(app);
+      await signOut(auth);
+      setIsMenuOpen(false);
+      window.location.href = "/";
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  }
 
   useEffect(() => {
+    let unsubAuth: (() => void) | null = null;
+    (async () => {
+      try {
+        const app = await import("@/lib/firebase").then((m) => m.getClientApp());
+        const { getAuth, onAuthStateChanged } = await import("firebase/auth");
+        const auth = getAuth(app);
+        unsubAuth = onAuthStateChanged(auth, (u) => {
+          if (u?.email) setUserEmail(u.email);
+        });
+      } catch (err) {}
+    })();
     let unsubHb: (() => void) | null = null;
     let unsubOnline: (() => void) | null = null;
     let unsubStatus: (() => void) | null = null;
@@ -61,15 +88,45 @@ export default function DeviceHeaderStatus({ deviceId }: { deviceId: string }) {
       unsubHb = onValue(hbRef, (snap) => {
         const val = snap.val();
         if (val !== null && val !== undefined) {
-          if (lastHeartbeatValue === null || val !== lastHeartbeatValue) {
-            lastHeartbeatValue = val;
-            lastHeartbeatChangeTime = Date.now();
+          lastHeartbeatValue = Number(val);
+          // ── KEY FIX: Immediately derive online state from the timestamp ──
+          // Don't wait for the 3-second interval check. As soon as we get a
+          // heartbeat value, determine if it's fresh (< 65s old).
+          const isRecent = (Date.now() - Number(val)) < 65000;
+          if (isRecent && !currentOnlineState) {
+            // Heartbeat is fresh → mark online immediately
+            setIsOnline(true);
+            currentOnlineState = true;
+          } else if (!isRecent && currentOnlineState) {
+            // Heartbeat is stale → mark offline immediately
+            setIsOnline(false);
+            currentOnlineState = false;
+          } else if (isOnline === null) {
+            // First load: set state based on heartbeat age
+            setIsOnline(isRecent);
+            currentOnlineState = isRecent;
           }
+          setLastSeen(new Date(Number(val)).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "short", timeStyle: "medium" }));
+        }
+      });
+
+      unsubUpdated = onValue(updatedRef, (snap) => {
+        const val = snap.val();
+        // Fallback to last_updated if last_heartbeat isn't present
+        if (val && !lastHeartbeatValue) {
+          setLastSeen(new Date(val).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", dateStyle: "short", timeStyle: "medium" }));
         }
       });
 
       unsubOnline = onValue(onlineRef, (snap) => {
         const val = snap.val();
+        // Only trust the Firebase `online` field if we don't have a fresh
+        // heartbeat to override it. This prevents stale `online: false` from
+        // showing offline right after page load.
+        if (lastHeartbeatValue !== null) {
+          const isRecent = (Date.now() - lastHeartbeatValue) < 65000;
+          if (isRecent) return; // heartbeat says online → ignore stale firebase field
+        }
         if (val === false) {
           setIsOnline(false);
           currentOnlineState = false;
@@ -81,6 +138,11 @@ export default function DeviceHeaderStatus({ deviceId }: { deviceId: string }) {
 
       unsubStatus = onValue(statusRef, (snap) => {
         const val = snap.val();
+        // Same as above — heartbeat timestamp wins over status field
+        if (lastHeartbeatValue !== null) {
+          const isRecent = (Date.now() - lastHeartbeatValue) < 65000;
+          if (isRecent) return;
+        }
         if (val === "offline") {
           setIsOnline(false);
           currentOnlineState = false;
@@ -90,30 +152,32 @@ export default function DeviceHeaderStatus({ deviceId }: { deviceId: string }) {
         }
       });
 
-      unsubUpdated = onValue(updatedRef, (snap) => {
-        const val = snap.val();
-        if (val) {
-          setLastSeen(new Date(val).toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" }));
-        }
-      }, (error) => {
-        // Ignore permission denied for last_updated if user doesn't own device
-      });
-
-      // 3. Active Heartbeat Monitor: Checks if hardware stopped updating last_heartbeat (15s interval -> 35s cutoff)
+      // 3. Active Heartbeat Monitor
+      // Hardware sends every 30s. We use 65s cutoff = 2+ missed heartbeats
+      // before we declare offline. Runs every 5 seconds.
       checkInterval = setInterval(() => {
-        if (currentOnlineState && Date.now() - lastHeartbeatChangeTime > 35000) {
-          // The heartbeat value has NOT changed for 35 seconds -> instantly mark offline in Firebase via Admin API
-          updatePresenceState({ online: false, status: "offline" });
-          setIsOnline(false);
-          currentOnlineState = false;
+        if (lastHeartbeatValue) {
+          const timeSinceHeartbeat = Date.now() - lastHeartbeatValue;
+          if (timeSinceHeartbeat > 65000 && currentOnlineState) {
+            // 2+ heartbeats missed → mark offline in Firebase
+            updatePresenceState({ online: false, status: "offline" });
+            setIsOnline(false);
+            currentOnlineState = false;
+          } else if (timeSinceHeartbeat <= 65000 && !currentOnlineState) {
+            // Heartbeat is fresh again (e.g. after reconnect) → mark online
+            updatePresenceState({ online: true, status: "online" });
+            setIsOnline(true);
+            currentOnlineState = true;
+          }
         }
-      }, 3000);
+      }, 5000);
 
     } catch (err) {
       console.warn("DeviceHeaderStatus: subscription failed", err);
     }
 
     return () => {
+      if (unsubAuth) unsubAuth();
       if (unsubHb) unsubHb();
       if (unsubOnline) unsubOnline();
       if (unsubStatus) unsubStatus();
@@ -126,17 +190,52 @@ export default function DeviceHeaderStatus({ deviceId }: { deviceId: string }) {
     };
   }, [deviceId]);
 
+  // Extract date and time if available
+  let hbDate = "";
+  let hbTime = "";
+  if (lastSeen) {
+    const parts = lastSeen.split(", ");
+    if (parts.length === 2) {
+      hbDate = parts[0];
+      hbTime = parts[1];
+    } else {
+      hbDate = lastSeen;
+    }
+  }
+
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-1 font-sans">
-      <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}></span>
-      <span className={`text-[11px] sm:text-xs font-semibold uppercase tracking-wider leading-tight ${isOnline ? "text-emerald-700" : "text-rose-700"}`}>
-        {isOnline ? "Device Online & Connected to WiFi" : "Device Offline (Operating on Local NVS / RTC)"}
-      </span>
-      {lastSeen && !isOnline && (
-        <span className="text-[10px] text-slate-400 font-medium">
-          (Last seen: {lastSeen})
-        </span>
-      )}
-    </div>
+    <>
+      {/* =========================================
+          MOBILE LAYOUT
+          ========================================= */}
+      <div className="flex md:hidden items-center justify-center w-full py-0.5 font-sans">
+        <div className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border ${isOnline ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200"}`}>
+          <span className={`h-2 w-2 rounded-full flex-shrink-0 ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}></span>
+          <span className={`text-[9px] font-bold uppercase tracking-wider ${isOnline ? "text-emerald-700" : "text-rose-700"}`}>
+            {isOnline ? "Device is Online" : "Device is Offline"}
+          </span>
+        </div>
+      </div>
+
+      {/* =========================================
+          DESKTOP LAYOUT (Reverted to original)
+          ========================================= */}
+      <div className="hidden md:flex relative items-center justify-center w-full font-sans mb-1 min-h-[24px]">
+        {/* Centered Online/Offline Status */}
+        <div className="flex items-center gap-2 justify-center">
+          <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`}></span>
+          <span className={`text-xs font-bold uppercase tracking-wider leading-tight ${isOnline ? "text-emerald-700" : "text-rose-700"}`}>
+            {isOnline ? "Device Online & Connected to WiFi" : "Device Offline (Operating on Local NVS / RTC)"}
+          </span>
+        </div>
+
+        {/* Top Right Heartbeat (Absolute right aligned) */}
+        {lastSeen && (
+          <div className="absolute right-0 text-[10px] text-slate-400 font-medium whitespace-nowrap text-right bg-white pl-2">
+            {isOnline ? "Heartbeat:" : "Last seen:"} {lastSeen}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

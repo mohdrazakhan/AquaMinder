@@ -60,9 +60,9 @@ export default function DeviceDashboard({ deviceId }: Props) {
   const recentLogs = allLogs.slice(0, 10);
 
   return (
-    <div className="space-y-8 font-sans">
+    <div className="space-y-2 font-sans">
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 gap-6 md:gap-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
+      <div className="hidden md:flex border-b border-slate-200 gap-6 md:gap-8 overflow-x-auto whitespace-nowrap scrollbar-hide">
         <button
           onClick={() => setTab("dashboard")}
           className={`font-medium text-sm pb-3 transition-colors ${
@@ -119,13 +119,14 @@ export default function DeviceDashboard({ deviceId }: Props) {
         </button>
       </div>
 
-      {/* ============ DASHBOARD HUB ============ */}
-      {tab === "dashboard" && (
-        <div className="space-y-6">
-          <RapidDropWarning logs={allLogs} />
-
-          {/* Main widget: Tank + Controls */}
+      {/* ============ DASHBOARD HUB (Always shown on mobile, conditional on desktop) ============ */}
+      {(tab === "dashboard" || true) && (
+        <div className={`space-y-3 ${tab !== 'dashboard' ? 'md:hidden' : ''}`}>
+          
+          {/* Main widget: Tank + Controls (Always top on mobile) */}
           <ClientDeviceWidget deviceId={deviceId} />
+
+          <RapidDropWarning logs={allLogs} />
 
           {/* Historical Graph */}
           <HistoricalChart logs={allLogs} />
@@ -173,7 +174,7 @@ export default function DeviceDashboard({ deviceId }: Props) {
 
       {/* ============ MANUAL OVERRIDE ============ */}
       {tab === "manual" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-8">
           <ClientDeviceWidget deviceId={deviceId} />
           <div className="bg-white border border-slate-200 rounded-xl p-6 h-fit">
             <h3 className="text-lg font-bold text-slate-900 mb-3">

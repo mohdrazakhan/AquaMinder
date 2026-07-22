@@ -36,6 +36,21 @@ body {
   animation: fadeUp 560ms cubic-bezier(.2,.9,.2,1) both;
 }
 
+@layer base {
+  body {
+    @apply text-slate-800 antialiased;
+    overscroll-behavior-y: none;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Add padding to main on mobile devices to prevent content hiding behind MobileBottomNav */
+  @media (max-width: 768px) {
+    main {
+      padding-bottom: 5rem;
+    }
+  }
+}
+
 @keyframes bob {
   0% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
@@ -62,3 +77,53 @@ body {
 .card-accent {
   background: linear-gradient(90deg, rgba(14,165,233,0.04), rgba(14,165,233,0));
 }
+
+/* ── 3D Water Tank Animations ── */
+@keyframes tankWave {
+  0%   { transform: translateX(0) scaleY(1); }
+  50%  { transform: translateX(-5%) scaleY(0.95); }
+  100% { transform: translateX(0) scaleY(1); }
+}
+@keyframes tankWave2 {
+  0%   { transform: translateX(0) scaleY(1); }
+  50%  { transform: translateX(5%) scaleY(1.05); }
+  100% { transform: translateX(0) scaleY(1); }
+}
+@keyframes glareShimmer {
+  0%, 100% { opacity: 0.35; }
+  50%       { opacity: 0.6; }
+}
+@keyframes waterGlow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(56,189,248,0.5)); }
+  50%       { filter: drop-shadow(0 0 18px rgba(56,189,248,0.9)); }
+}
+@keyframes pourFall {
+  0%   { transform: scaleY(0); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: scaleY(1); opacity: 0.9; }
+}
+@keyframes dropFall {
+  0%   { transform: translateY(0);    opacity: 1; }
+  100% { transform: translateY(60px); opacity: 0; }
+}
+@keyframes bubbleUp {
+  0%   { transform: translateY(0)     scale(1);   opacity: 0.7; }
+  100% { transform: translateY(-60px) scale(0.4); opacity: 0; }
+}
+@keyframes tankScanLine {
+  0%   { transform: translateY(0%); }
+  100% { transform: translateY(4900%); }
+}
+.tank-wave-1  { animation: tankWave  3.5s ease-in-out infinite; }
+.tank-wave-2  { animation: tankWave2 4.2s ease-in-out infinite; }
+.tank-glare   { animation: glareShimmer 3s ease-in-out infinite; }
+.tank-glow    { animation: waterGlow 2.5s ease-in-out infinite; }
+.pour-fall    { animation: pourFall 1.4s ease-in-out infinite; transform-origin: top center; }
+.drop-a       { animation: dropFall 0.7s linear infinite 0s; }
+.drop-b       { animation: dropFall 0.7s linear infinite 0.25s; }
+.drop-c       { animation: dropFall 0.7s linear infinite 0.5s; }
+.bubble-a     { animation: bubbleUp 2.2s ease-out infinite 0s; }
+.bubble-b     { animation: bubbleUp 2.8s ease-out infinite 0.6s; }
+.bubble-c     { animation: bubbleUp 2.0s ease-out infinite 1.2s; }
+.tank-scan    { animation: tankScanLine 4s linear infinite; }

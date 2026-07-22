@@ -57,12 +57,12 @@ export default function NavBar() {
   }
 
   return (
-    <header className="w-full border-b bg-white relative z-50">
-      <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <header className="w-full border-b border-slate-200 bg-white sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/images/logo.png" alt="Aqua Minder" width={44} height={44} className="nav-logo" />
-            <span className="font-semibold text-lg text-slate-900 hidden sm:block">Aqua Minder</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <Image src="/images/logo.png" alt="Aqua Minder" width={36} height={36} className="nav-logo object-contain" />
+            <span className="font-extrabold text-lg text-slate-900 tracking-tight">Aqua Minder</span>
           </Link>
         </div>
 

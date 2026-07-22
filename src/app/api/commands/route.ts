@@ -11,21 +11,28 @@ export async function POST(req: Request) {
   const admin = getAdmin();
   const decoded = await admin.auth().verifyIdToken(token);
   const uid = decoded.uid;
+  const email = decoded.email || "";
 
   // require payload
   const { devicePath, cmd, payload } = body;
   if (!devicePath || !cmd) return NextResponse.json({ error: "invalid" }, { status: 400 });
 
-  // ensure device belongs to uid
+  // ensure device belongs to uid or admin
   const deviceId = devicePath.replace(/^tanks\//, "").replace(/^devices\//, "").split("/")[0];
   const devSnap = await admin.database().ref(`tanks/${deviceId}`).get();
-  if (!devSnap.exists() || devSnap.val().ownerUid !== uid) {
+  
+  const isSuperAdmin = email === "aquamindr@gmail.com";
+  if (!devSnap.exists() || (devSnap.val().ownerUid !== uid && !isSuperAdmin)) {
     return NextResponse.json({ error: "permission_denied" }, { status: 403 });
   }
 
-  // Ensure device is currently online before accepting motor/night mode control commands
+  // Ensure device is currently online (fresh heartbeat < 65s or database status online)
   const devVal = devSnap.val();
-  if (devVal.online === false || devVal.status === "offline") {
+  const lastHb = devVal.last_heartbeat || devVal.last_updated;
+  const isHeartbeatFresh = lastHb ? (Date.now() - Number(lastHb)) <= 65000 : false;
+  const isDeviceOnline = isHeartbeatFresh || (devVal.online !== false && devVal.status !== "offline");
+
+  if (!isDeviceOnline) {
     return NextResponse.json({ error: "device_offline", message: "AquaMinder hardware is powered off or disconnected." }, { status: 400 });
   }
 
@@ -40,6 +47,7 @@ export async function POST(req: Request) {
   // update the root tank reference so AquaMinder hardware detects it instantly
   if (Object.keys(updates).length > 0) {
     await admin.database().ref(`tanks/${deviceId}`).update(updates);
+    await admin.database().ref(`tanks/${deviceId}/stream/command_updated`).set(Date.now());
   }
 
   // also push command to the queue log

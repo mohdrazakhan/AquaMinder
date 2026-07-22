@@ -12,15 +12,17 @@ export async function POST(req: Request) {
     const admin = getAdmin();
     const decoded = await admin.auth().verifyIdToken(token);
     const uid = decoded.uid;
+    const email = decoded.email || "";
 
     const { deviceId, dashboard_active, online, status } = body;
     if (!deviceId) {
       return NextResponse.json({ error: "invalid_params" }, { status: 400 });
     }
 
-    // Ensure device belongs to user
+    // Ensure device belongs to user or admin
     const devSnap = await admin.database().ref(`tanks/${deviceId}`).get();
-    if (!devSnap.exists() || devSnap.val().ownerUid !== uid) {
+    const isSuperAdmin = email === "aquamindr@gmail.com";
+    if (!devSnap.exists() || (devSnap.val().ownerUid !== uid && !isSuperAdmin)) {
       return NextResponse.json({ error: "permission_denied" }, { status: 403 });
     }
 

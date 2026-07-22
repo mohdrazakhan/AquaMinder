@@ -2,10 +2,30 @@ import './styles/globals.css';
 import React from 'react';
 import NavBar from '@/components/ui/NavBar';
 import Footer from '@/components/ui/Footer';
+import MobileBottomNav from '@/components/ui/MobileBottomNav';
+import type { Metadata, Viewport } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Aqua Minder',
   description: 'Smart water monitoring for homes',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Aqua Minder',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#ffffff',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -22,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="w-full max-w-7xl px-4">{children}</div>
         </main>
         <Footer />
+        <MobileBottomNav />
       </body>
     </html>
   );
